@@ -14,8 +14,7 @@ mod TokenSale {
 
     impl UpgradableInternalImpl = UpgradeableComponent::InternalImpl<ContractState>;
 
-    #[abi(embed_v0)]
-    impl OwnableImpl = OwnableComponent::OwnableMixinImpl<ContractState>;
+    impl OwnableImpl = OwnableComponent::InternalImpl<ContractState>;
 
     #[storage]
     struct Storage {
@@ -87,10 +86,8 @@ mod TokenSale {
         }
 
         fn upgrade(ref self: ContractState, new_class_hash: ClassHash){
-            assert(get_caller_address() == self.owner.read(), 'Unauthorized caller');
-
+            self.ownable.assert_only_owner();
             self.upgradable.upgrade(new_class_hash);
-            self.ownable.owner();
         }
     }
 }
