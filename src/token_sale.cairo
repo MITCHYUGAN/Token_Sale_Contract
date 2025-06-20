@@ -41,9 +41,11 @@ mod TokenSale {
     #[constructor]
     fn constructor(ref self: ContractState, owner: ContractAddress, accepted_payment_token: ContractAddress) {
         self.owner.write(owner);
+        self.ownable.initializer(owner);
         self.accepted_payment_token.write(accepted_payment_token);
     }
 
+    #[abi(embed_v0)]
     impl TokenSaleImpl of ITokenSale<ContractState> {
         fn check_available_token(self: @ContractState, token_address: ContractAddress,) -> u256 {
             let token = IERC20Dispatcher {contract_address: token_address};
@@ -58,7 +60,7 @@ mod TokenSale {
             let this_contract = get_contract_address();
             assert(caller == self.owner.read(), 'Unauthorized');
 
-            let token = IERC20Dispatcher {contract_address: self.accepted_payment_token.read()};
+            let token = IERC20Dispatcher {contract_address: token_address};
             assert(token.balance_of(caller) > 0, 'insufficient balance');
 
             let transfer = token.transfer_from(caller, this_contract, amount);
